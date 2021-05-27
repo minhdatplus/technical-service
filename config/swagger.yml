@@ -1,0 +1,85 @@
+swagger: "2.0"
+info:
+  description: "Manage resources access with the Historical API"
+  version: "1.0.0"
+  title: "Historical API"
+externalDocs:
+  description: "Documentation"
+  url: "https://localhost:8888"
+host: "localhost"
+basePath: "/"
+tags:
+  - name: "historical"
+    description: "Everything about your Historical"
+  - name: "historical-api"
+    description: "Historical management APIs"
+schemes:
+  - "https"
+  - "http"
+paths:
+  /trading/amibroker:
+    post:
+      tags:
+        - "amibroker"
+      summary: "Provider historical data for Amibroker"
+      description: ""
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Amibroker request body"
+          required: true
+          schema:
+            $ref: "#/definitions/AmibrokerRequest"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/AmibrokerResponse"
+
+definitions:
+  Amibroker:
+    type: "object"
+    properties:
+      symbol:
+        type: "string"
+      open:
+        type: "number"
+        format: "int64"
+      highest:
+        type: "number"
+        format: "int64"
+      lowest:
+        type: "number"
+        format: "int64"
+      close:
+        type: "number"
+        format: "int64"
+      tradingdate:
+        type: "string"
+  AmibrokerRequest:
+    type: "object"
+    properties:
+      symbol:
+        type: "string"
+      interval:
+        type: "number"
+        format: "int64"
+      from:
+        type: "string"
+      to:
+        type: "string"
+  AmibrokerResponse:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+      code:
+        type: "number"
+      data:
+        type: "array"
+        items:
+          $ref: '#/definitions/Amibroker'

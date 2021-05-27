@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="15">
+
+    <Properties>
+        <Property name="blank-pattern">%msg%n</Property>
+        <Property name="only-thread-name-pattern">%t -> %msg%n</Property>
+        <Property name="default-pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Property>
+        <Property name="debug-pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} (%F:%L) - %msg%n</Property>
+    </Properties>
+
+    <Appenders>
+        <Sentry name="Sentry"/>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${debug-pattern}"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info" includeLocation="true">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Sentry" level="error"/>
+        </Root>
+
+        <Logger name="org.reflections" level="off"/>
+
+        <Logger name="org.apache.kafka" level="error"/>
+
+        <Logger name="io.gridgo" level="warn"/>
+        <Logger name="ai.caria" level="debug" includeLocation="true"/>
+    </Loggers>
+</Configuration>

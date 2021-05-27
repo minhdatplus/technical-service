@@ -1,0 +1,32 @@
+--add-modules java.se
+--add-exports java.base/jdk.internal.ref=ALL-UNNAMED
+--add-opens java.base/java.lang=ALL-UNNAMED
+--add-opens java.base/java.nio=ALL-UNNAMED
+--add-opens java.base/sun.nio.ch=ALL-UNNAMED
+--add-opens java.management/sun.management=ALL-UNNAMED
+--add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
+#
+-Dfile.encoding=UTF-8
+-server
+-Xms2G
+-Xmx4G
+#
+# force to use G1GC
+-XX:+UseG1GC
+-XX:MaxGCPauseMillis=100
+#
+# heap dump
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=logs/heap-dump-$HOSTNAME.hprof
+#
+# log4j config to use disruptor
+-DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
+-DAsyncLoggerConfig.RingBufferSize=1024*1024
+#
+# additional options which configured from pom's properties gone here
+-XX:+UseG1GC
+            -XX:MaxGCPauseMillis=100
+            -XX:ParallelGCThreads=8
+            -XX:ConcGCThreads=4
+            -XX:InitiatingHeapOccupancyPercent=60
+#

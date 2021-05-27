@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="maven-antrun-" default="main"  >
+<target name="main">
+  <delete failonerror="false">
+    <fileset dir="dist/historical-app"/>
+  </delete>
+  <copy todir="dist/historical-app/lib">
+    <fileset dir="/Users/mdplus/Workspace/Home/MasOfEng/Java/historical/historical-app/target">
+      <exclude name="*-sources.jar"/>
+      <exclude name="*-javadoc.jar"/>
+      <include name="*.jar"/>
+    </fileset>
+  </copy>
+  <copy todir="dist/historical-app/config" failonerror="false">
+    <fileset dir="/Users/mdplus/Workspace/Home/MasOfEng/Java/historical/historical-app/config"/>
+  </copy>
+  <echo file="dist/historical-app/version.txt" append="false">0.1.0-SNAPSHOT</echo>
+  <echo file="dist/historical-app/historical-app.vmoptions">--add-modules java.se
+--add-exports java.base/jdk.internal.ref=ALL-UNNAMED
+--add-opens java.base/java.lang=ALL-UNNAMED
+--add-opens java.base/java.nio=ALL-UNNAMED
+--add-opens java.base/sun.nio.ch=ALL-UNNAMED
+--add-opens java.management/sun.management=ALL-UNNAMED
+--add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
+#
+-Dfile.encoding=UTF-8
+-server
+-Xms2G
+-Xmx4G
+#
+# force to use G1GC
+-XX:+UseG1GC
+-XX:MaxGCPauseMillis=100
+#
+# heap dump
+-XX:+HeapDumpOnOutOfMemoryError
+-XX:HeapDumpPath=logs/heap-dump-$HOSTNAME.hprof
+#
+# log4j config to use disruptor
+-DLog4jContextSelector=org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
+-DAsyncLoggerConfig.RingBufferSize=1024*1024
+#
+# additional options which configured from pom&apos;s properties gone here
+-XX:+UseG1GC
+            -XX:MaxGCPauseMillis=100
+            -XX:ParallelGCThreads=8
+            -XX:ConcGCThreads=4
+            -XX:InitiatingHeapOccupancyPercent=60
+#</echo>
+  <echo file="dist/historical-app/start-historical-app.sh">#!/bin/bash
+SELF_ABSOLUTE_PATH=&quot;$(cd &quot;$(dirname &quot;${BASH_SOURCE[0]}&quot;)&quot; &amp;&amp; pwd)/$(basename &quot;${BASH_SOURCE[0]}&quot;)&quot;
+WORKING_DIR=$(dirname $SELF_ABSOLUTE_PATH)
+read_vmoptions() {
+  vmoptions_file=`eval echo &quot;$1&quot; 2&gt;/dev/null`
+  if [ ! -r &quot;$vmoptions_file&quot; ]; then
+    vmoptions_file=&quot;$prg_dir/$vmoptions_file&quot;
+  fi
+  if [ -r &quot;$vmoptions_file&quot; ] &amp;&amp; [ -f &quot;$vmoptions_file&quot; ]; then
+    exec 8&lt; &quot;$vmoptions_file&quot;
+    while read cur_option&lt;&amp;8; do
+      is_comment=`expr &quot;W$cur_option&quot; : &apos;W *#.*&apos;`
+      if [ &quot;$is_comment&quot; = &quot;0&quot; ]; then
+      	echo $(eval echo $cur_option)
+        vmo_include=`expr &quot;W$cur_option&quot; : &apos;W *-include-options \(.*\)&apos;`
+        if [ &quot;$vmo_include&quot; = &quot;&quot; ]; then
+          JVM_OPTS=&quot;$JVM_OPTS $(eval echo $cur_option)&quot;
+        fi
+      fi
+    done
+    exec 8&lt;&amp;-
+    if [ ! &quot;$vmo_include&quot; = &quot;&quot; ]; then
+      read_vmoptions &quot;$vmo_include&quot;
+    fi
+  fi
+}
+JVM_OPTS=&quot;&quot;
+read_vmoptions $WORKING_DIR/historical-app.vmoptions
+MAIN_CLASS=ai.caria.historical.app.HistoricalApplication
+LOCAL_CLASSPATH=&quot;$WORKING_DIR/*:$WORKING_DIR/lib/*&quot;
+java $JVM_OPTS -cp &quot;$LOCAL_CLASSPATH&quot; -Dworking.dir=$WORKING_DIR $MAIN_CLASS $@</echo>
+  <copy file="dist/historical-app/start-historical-app.sh" tofile="dist/historical-app/start-historical-app-background.sh"/>
+  <echo file="dist/historical-app/start-historical-app-background.sh" append="true">&gt; /dev/null 2&gt;&amp;1 &amp;</echo>
+</target>
+</project>
